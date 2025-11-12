@@ -3,6 +3,6 @@ import time
 
 led = LED(18)
 
-print("Scriptet kjører... LED på!")
+print("Scriptet kjører... LED ble ikke på alikevel!")
 led.on()
 
