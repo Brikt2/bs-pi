@@ -1,20 +1,21 @@
-from gpiozero import Button
-import os
-import subprocess
-import time
+[Unit]
+Description=Entur Controller Button Service
+After=network.target
 
-# GPIO 17
-button = Button(17)
+[Service]
+# Bruk 'pi' som eier av prosessen
+User=pi
+WorkingDirectory=/home/pi/entur_project
 
-def update_and_run():
-    print("Oppdaterer fra GitHub...")
-    os.chdir("/home/pi/dittrepo")
-    subprocess.run(["git", "pull"])
-    print("Starter script...")
-    subprocess.run(["python3", "main.py"])
+# Start-kommando (juster stien om nødvendig)
+ExecStart=/usr/bin/python3 /home/pi/entur_project/controller_button.py
 
-print("Klar. Trykk på knappen for å oppdatere og kjøre scriptet.")
-while True:
-    button.wait_for_press()
-    update_and_run()
-    time.sleep(1)
+# Restart hvis scriptet krasjer
+Restart=always
+RestartSec=5
+
+# Sørg for at GPIO får tilgang
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
