@@ -66,7 +66,7 @@ def show_departures(calls):
     print("\n=== Retning sentrum ===")
     print_departures(sentrum_departures)
 
-    print("\n=== Den andre retningen ===")
+    print("\n=== Gokk ===")
     print_departures(other_way_departures)
 
 
