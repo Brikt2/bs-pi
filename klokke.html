@@ -109,7 +109,6 @@
             <div id="minutes" class="digits">00</div>
           </div>
         </div>
-        <div class="meta" id="meta">24-t klokke — lokal tid</div>
       </div>
     </div>
   </div>
@@ -118,7 +117,6 @@
 (function(){
   const elHours = document.getElementById('hours');
   const elMinutes = document.getElementById('minutes');
-  const elMeta = document.getElementById('meta');
 
   // Format numbers with leading zero
   const two = n => String(n).padStart(2,'0');
@@ -151,18 +149,6 @@
 
   scheduleNext();
 
-  // Optional: show timezone / offset in meta line (helpful on varied devices)
-  try {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-    const offsetMin = -new Date().getTimezoneOffset();
-    const sign = offsetMin >= 0 ? '+' : '-';
-    const hh = Math.floor(Math.abs(offsetMin) / 60);
-    const mm = Math.abs(offsetMin) % 60;
-    elMeta.textContent = tz ? `24-t klokke — ${tz} (UTC${sign}${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')})` : `24-t klokke — lokal tid (UTC${sign}${two(hh)}:${two(mm)})`;
-  } catch(e){
-    elMeta.textContent = '24-t klokke — lokal tid';
-  }
-})();
 </script>
 </body>
 </html>
