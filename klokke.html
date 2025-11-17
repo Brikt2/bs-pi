@@ -102,4 +102,67 @@
   <div class="wrap">
     <div class="clock" role="region" aria-label="Digital klokke, 24 timers format">
       <div>
-        <div class="time" aria-live="polite" ari
+        <div class="time" aria-live="polite" aria-atomic="true">
+          <div class="hhmm">
+            <div id="hours" class="digits">00</div>
+            <div class="colon" aria-hidden="true">:</div>
+            <div id="minutes" class="digits">00</div>
+          </div>
+        </div>
+        <div class="meta" id="meta">24-t klokke — lokal tid</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const elHours = document.getElementById('hours');
+  const elMinutes = document.getElementById('minutes');
+  const elMeta = document.getElementById('meta');
+
+  // Format numbers with leading zero
+  const two = n => String(n).padStart(2,'0');
+
+  // Update function — updates hours and minutes
+  function updateClock() {
+    const now = new Date();
+    const h = now.getHours();     // 0..23
+    const m = now.getMinutes();   // 0..59
+
+    // Write to DOM only if changed to minimize repaints
+    if (elHours.textContent !== two(h)) elHours.textContent = two(h);
+    if (elMinutes.textContent !== two(m)) elMinutes.textContent = two(m);
+  }
+
+  // First update immediately
+  updateClock();
+
+  // Efficient updating: schedule next tick exactly when minute changes
+  function scheduleNext() {
+    const now = new Date();
+    const msToNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+    // Update when the minute flips
+    setTimeout(() => {
+      updateClock();
+      // After flipping minute, schedule subsequent updates every minute
+      setInterval(updateClock, 60 * 1000);
+    }, msToNextMinute);
+  }
+
+  scheduleNext();
+
+  // Optional: show timezone / offset in meta line (helpful on varied devices)
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    const offsetMin = -new Date().getTimezoneOffset();
+    const sign = offsetMin >= 0 ? '+' : '-';
+    const hh = Math.floor(Math.abs(offsetMin) / 60);
+    const mm = Math.abs(offsetMin) % 60;
+    elMeta.textContent = tz ? `24-t klokke — ${tz} (UTC${sign}${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')})` : `24-t klokke — lokal tid (UTC${sign}${two(hh)}:${two(mm)})`;
+  } catch(e){
+    elMeta.textContent = '24-t klokke — lokal tid';
+  }
+})();
+</script>
+</body>
+</html>
