@@ -22,7 +22,7 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* we scale to fit, så ingen scrolling */
+            overflow: hidden; /* we scale to fit, so no scrolling */
             background: var(--background-color);
             color: var(--text-color);
             -webkit-font-smoothing:antialiased;
@@ -58,6 +58,7 @@
 
         /* General content styles inside board */
         #board h2 {
+            padding-top: 20px;
             font-size: clamp(32px, 5vw, 48px);
             font-weight: 900;
             margin-bottom: 16px;
@@ -180,6 +181,15 @@
             .lineName { font-size: 18px; }
             .departureTime { font-size: 18px; }
         }
+
+        .center {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+        }
+
     </style>
 </head>
 <body>
@@ -187,17 +197,18 @@
         <div id="board" aria-live="polite">
             <h2>Jakob Kirke</h2>
 
-            <!-- Two direction sections. These will be placed in two columns when needed. -->
-            <div class="directions">
-                <section id="sentrumSection" class="direction" aria-label="Retning sentrum">
-                    <h3>Retning sentrum</h3>
-                    <div id="departuresSentrum" class="departure-list">Loading...</div>
-                </section>
+            <div class="center">
+                <div class="directions">
+                    <section id="sentrumSection" class="direction" aria-label="Retning sentrum">
+                        <h3>Retning sentrum</h3>
+                        <div id="departuresSentrum" class="departure-list">Loading...</div>
+                    </section>
 
-                <section id="otherSection" class="direction" aria-label="Den andre retningen">
-                    <h3>Den andre retningen</h3>
-                    <div id="departuresOtherWay" class="departure-list">Loading...</div>
-                </section>
+                    <section id="otherSection" class="direction" aria-label="Den andre retningen">
+                        <h3>Den andre retningen</h3>
+                        <div id="departuresOtherWay" class="departure-list">Loading...</div>
+                    </section>
+                </div>
             </div>
         </div>
     </div>
@@ -243,7 +254,7 @@
                     }),
                 });
 
-                if (!response.ok) throw new Error(`Response ${response.status}`);
+
 
                 departuresData = await response.json();
                 showDepartures();
