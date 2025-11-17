@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Infoskjerm</title>
-</head>
-<body>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
 
@@ -20,19 +18,46 @@
             --font-lineName: "Inter", sans-serif;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-                        Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* we scale to fit, så ingen scrolling */
             background: var(--background-color);
             color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            max-width: 1400px;
-            margin-left: auto;
-            margin-right: auto;
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
         }
 
-        h2 {
+        /* Outer app container full viewport, centers the board */
+        #app {
+            box-sizing: border-box;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* The board will be scaled to fit the viewport when necessary */
+        #board {
+            width: min(1400px, 100%);
+            box-sizing: border-box;
+            transform-origin: top left;
+            transition: transform 180ms ease;
+        }
+
+        /* When we need two columns (one per direction) we toggle this */
+        #board.columns .directions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        /* General content styles inside board */
+        #board h2 {
             font-size: clamp(32px, 5vw, 48px);
             font-weight: 900;
             margin-bottom: 16px;
@@ -41,7 +66,7 @@
             padding-bottom: 8px;
         }
 
-        h2::after {
+        #board h2::after {
             content: "";
             display: block;
             width: 60px;
@@ -51,7 +76,7 @@
             border-radius: 2px;
         }
 
-        h3 {
+        #board h3 {
             font-size: clamp(20px, 3vw, 28px);
             font-weight: 700;
             margin: 24px 0 12px;
@@ -60,13 +85,21 @@
             gap: 12px;
         }
 
-        h3::before {
+        #board h3::before {
             content: "";
             display: block;
             width: 6px;
             height: 100%;
             background-color: var(--primary-color);
             border-radius: 3px;
+        }
+
+        .direction {
+            /* Each direction contains its heading+list */
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0; /* allow shrinking in grid */
         }
 
         .departure-list {
@@ -84,6 +117,7 @@
             justify-content: space-between;
             align-items: center;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-sizing: border-box;
         }
 
         .departures:hover {
@@ -95,6 +129,7 @@
             display: flex;
             align-items: center;
             gap: 16px;
+            min-width: 0;
         }
 
         .lineNumber {
@@ -115,6 +150,10 @@
             font-family: var(--font-lineName);
             font-size: 20px;      
             font-weight: 600;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            max-width: 32ch;
         }
 
         .departureTime {
@@ -123,6 +162,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
         }
 
         .realtimeDot {
@@ -133,116 +173,196 @@
             display: inline-block;
         }
 
+        /* Small screens: reduce sizes a bit */
         @media (max-width: 480px) {
-            body { padding: 10px; }
-            h2 { font-size: 28px; }
-            h3 { font-size: 18px; }
+            #app { padding: 10px; }
             .lineNumber { width: 48px; height: 48px; font-size: 20px; }
             .lineName { font-size: 18px; }
             .departureTime { font-size: 18px; }
         }
-
     </style>
-    <h2>Jakob Kirke</h2>
-    <h3>Retning sentrum</h3>
-    <div id="departuresSentrum">Loading...</div>
-    
-    <h3>Den andre retningen</h3>
-    <div id="departuresOtherWay">Loading...</div>
+</head>
+<body>
+    <div id="app">
+        <div id="board" aria-live="polite">
+            <h2>Jakob Kirke</h2>
+
+            <!-- Two direction sections. These will be placed in two columns when needed. -->
+            <div class="directions">
+                <section id="sentrumSection" class="direction" aria-label="Retning sentrum">
+                    <h3>Retning sentrum</h3>
+                    <div id="departuresSentrum" class="departure-list">Loading...</div>
+                </section>
+
+                <section id="otherSection" class="direction" aria-label="Den andre retningen">
+                    <h3>Den andre retningen</h3>
+                    <div id="departuresOtherWay" class="departure-list">Loading...</div>
+                </section>
+            </div>
+        </div>
+    </div>
 
     <script>
-        async function fetchDepartures() {
-        const url = "https://api.entur.io/journey-planner/v3/graphql";
+        let departuresData = null;
 
-        try {
-            const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "ET-Client-Name": "Infoboard-app",
-            },
-            body: JSON.stringify({
-                query: `
-                {
-                    stopPlace(id: "NSR:StopPlace:6435") {
-                    id
-                    name
-                    estimatedCalls(timeRange: 72100, numberOfDepartures: 12) {
-                        realtime
-                        aimedArrivalTime
-                        expectedArrivalTime
-                        destinationDisplay {
-                        frontText
-                        }
-                        serviceJourney {
-                        journeyPattern {
-                            line {
-                            id
-                            transportMode
+        async function fetchDepartures() {
+            const url = "https://api.entur.io/journey-planner/v3/graphql";
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "ET-Client-Name": "Infoboard-app",
+                    },
+                    body: JSON.stringify({
+                        query: `
+                        {
+                            stopPlace(id: "NSR:StopPlace:6435") {
+                                id
+                                name
+                                estimatedCalls(timeRange: 72100, numberOfDepartures: 12) {
+                                    realtime
+                                    aimedArrivalTime
+                                    expectedArrivalTime
+                                    destinationDisplay {
+                                        frontText
+                                    }
+                                    serviceJourney {
+                                        journeyPattern {
+                                            line {
+                                                id
+                                                transportMode
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
-                        }
-                    }
-                    }
-                }
-                `,
-            }),
-            });
+                        `,
+                    }),
+                });
 
-            if (!response.ok) throw new Error(`Response ${response.status}`);
+                if (!response.ok) throw new Error(`Response ${response.status}`);
 
-            departuresData = await response.json();
-            showDepartures();
-        } catch (error) {
-            console.error("Fetch error:", error.message);
-        }
+                departuresData = await response.json();
+                showDepartures();
+            } catch (error) {
+                console.error("Fetch error:", error.message);
+            }
         }
 
         function formatDepartureTime(expectedArrival) {
-        const now = new Date();
-        const timeDiff = Math.floor((expectedArrival - now) / 1000 / 60);
+            const now = new Date();
+            const timeDiff = Math.floor((expectedArrival - now) / 1000 / 60);
 
-        if (timeDiff <= 0) return "nå";
-        if (timeDiff <= 15) return timeDiff + " min";
+            if (timeDiff <= 0) return "nå";
+            if (timeDiff <= 15) return timeDiff + " min";
 
-        return expectedArrival.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            return expectedArrival.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
 
         function showDepartures() {
-        const sentrum = ["Kværnerbyen", "Ekeberg hageby"];
-        const otherWay = ["Kjelsås stasjon", "Tåsen"];
+            const sentrum = ["Kværnerbyen", "Ekeberg hageby"];
+            const otherWay = ["Kjelsås stasjon", "Tåsen"];
 
-        const calls = departuresData.data?.stopPlace?.estimatedCalls || [];
-        const containerSentrum = document.getElementById("departuresSentrum");
-        const containerOtherWay = document.getElementById("departuresOtherWay");
+            const calls = departuresData?.data?.stopPlace?.estimatedCalls || [];
+            const containerSentrum = document.getElementById("departuresSentrum");
+            const containerOtherWay = document.getElementById("departuresOtherWay");
 
-        containerSentrum.innerHTML = "";
-        containerOtherWay.innerHTML = "";
+            containerSentrum.innerHTML = "";
+            containerOtherWay.innerHTML = "";
 
-        for (let call of calls) {
-            const frontText = call.destinationDisplay.frontText;
-            const lineId = call.serviceJourney.journeyPattern.line.id.split(":").pop();
-            const expectedArrival = new Date(call.expectedArrivalTime);
+            for (let call of calls) {
+                const frontText = call.destinationDisplay.frontText || "";
+                const lineId = (call.serviceJourney?.journeyPattern?.line?.id || "").split(":").pop();
+                const expectedArrival = new Date(call.expectedArrivalTime || call.aimedArrivalTime);
 
-            const div = document.createElement("div");
-            div.classList.add("departures");
-            div.innerHTML = `
-            <div class="lineBox">
-                <span class="lineNumber">${lineId}</span>
-                <span class="lineName">${frontText}</span>
-            </div>
-            <span class="departureTime">${formatDepartureTime(expectedArrival)}</span>
-            `;
+                const div = document.createElement("div");
+                div.classList.add("departures");
+                div.innerHTML = `
+                    <div class="lineBox">
+                        <span class="lineNumber">${lineId}</span>
+                        <span class="lineName" title="${frontText}">${frontText}</span>
+                    </div>
+                    <span class="departureTime">${formatDepartureTime(expectedArrival)}</span>
+                `;
 
-            if (sentrum.includes(frontText)) containerSentrum.appendChild(div);
-            else if (otherWay.includes(frontText)) containerOtherWay.appendChild(div);
+                if (sentrum.includes(frontText)) containerSentrum.appendChild(div);
+                else if (otherWay.includes(frontText)) containerOtherWay.appendChild(div);
+                else {
+                    // If it doesn't match either list, put it into the shorter column so both fill nicely
+                    if (containerSentrum.childElementCount <= containerOtherWay.childElementCount) containerSentrum.appendChild(div);
+                    else containerOtherWay.appendChild(div);
+                }
+            }
+
+            // After updating the DOM, try to fit everything
+            fitToViewport();
         }
+
+        /* ---------- RESPONSIVE: two-column + scaling logic ----------
+
+           Goal:
+           - If content height does not fit in the viewport, switch to two-column layout
+             (one column per direction) to reduce height.
+           - If still doesn't fit, scale the entire board down so everything is visible
+             without scrolling on any device/size.
+           - Always keep no vertical scroll; body overflow is hidden.
+
+        -------------------------------------------------------------*/
+
+        function fitToViewport() {
+            const board = document.getElementById('board');
+
+            // Reset to single column and unscaled to measure natural size
+            board.classList.remove('columns');
+            board.style.transform = 'scale(1)';
+
+            // Use requestAnimationFrame to ensure layout has updated
+            requestAnimationFrame(() => {
+                const boardW = board.scrollWidth;
+                const boardH = board.scrollHeight;
+                const viewportW = window.innerWidth - 40; // account for #app padding
+                const viewportH = window.innerHeight - 40;
+
+                // If it doesn't fit vertically, switch to two-column layout
+                if (boardH > viewportH) {
+                    board.classList.add('columns');
+                } else {
+                    board.classList.remove('columns');
+                }
+
+                // Re-measure after applying columns
+                requestAnimationFrame(() => {
+                    const newW = board.scrollWidth;
+                    const newH = board.scrollHeight;
+
+                    // Compute scale so it fits both width and height
+                    const scale = Math.min(
+                        viewportW / newW,
+                        viewportH / newH,
+                        1 // don't upscale beyond 1
+                    );
+
+                    board.style.transform = 'scale(' + scale + ')';
+                });
+            });
         }
 
+        // Recompute layout on resize/orientation change
+        window.addEventListener('resize', fitToViewport);
+        window.addEventListener('orientationchange', () => {
+            // small delay to allow orientation metrics to stabilize
+            setTimeout(fitToViewport, 150);
+        });
+
+        // Keep fetching and showing departures
         setInterval(fetchDepartures, 30000);
         fetchDepartures();
-        setInterval(showDepartures, 9000);
 
+        // Also refresh visible layout periodically to handle dynamic content changes
+        setInterval(fitToViewport, 2500);
     </script>
 </body>
 </html>
