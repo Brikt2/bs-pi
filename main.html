@@ -275,45 +275,82 @@
         }
 
         function showDepartures() {
-            const sentrum = ["Kværnerbyen", "Ekeberg hageby"];
-            const otherWay = ["Kjelsås stasjon", "Tåsen"];
+    const sentrumNames = ["Kværnerbyen", "Ekeberg hageby"];
+    const otherNames = ["Kjelsås stasjon", "Tåsen"];
 
-            const calls = departuresData?.data?.stopPlace?.estimatedCalls || [];
-            const containerSentrum = document.getElementById("departuresSentrum");
-            const containerOtherWay = document.getElementById("departuresOtherWay");
+    const calls = departuresData?.data?.stopPlace?.estimatedCalls || [];
 
-            containerSentrum.innerHTML = "";
-            containerOtherWay.innerHTML = "";
+    // Lag to lister for hver retning
+    let sentrumDepartures = [];
+    let otherDepartures = [];
 
-            for (let call of calls) {
-                const frontText = call.destinationDisplay.frontText || "";
-                const lineId = (call.serviceJourney?.journeyPattern?.line?.id || "").split(":").pop();
-                const expectedArrival = new Date(call.expectedArrivalTime || call.aimedArrivalTime);
+    for (let call of calls) {
+        const dest = call.destinationDisplay.frontText || "";
 
-                const div = document.createElement("div");
-                div.classList.add("departures");
-                div.innerHTML = `
-                    <div class="lineBox">
-                        <span class="lineNumber">${lineId}</span>
-                        <span class="lineName" title="${frontText}">${frontText}</span>
-                    </div>
-                    <span class="departureTime">${formatDepartureTime(expectedArrival)}</span>
-                `;
+        if (sentrumNames.includes(dest)) sentrumDepartures.push(call);
+        else if (otherNames.includes(dest)) otherDepartures.push(call);
+    }
 
-                if (sentrum.includes(frontText)) containerSentrum.appendChild(div);
-                else if (otherWay.includes(frontText)) containerOtherWay.appendChild(div);
-                else {
-                    // If it doesn't match either list, put it into the shorter column so both fill nicely
-                    if (containerSentrum.childElementCount <= containerOtherWay.childElementCount) containerSentrum.appendChild(div);
-                    else containerOtherWay.appendChild(div);
-                }
-            }
-            sentrumDepartures = sentrumDepartures.slice(0, 5);
-            otherDepartures = otherDepartures.slice(0, 5);
+    // Sorter etter tid (Entur er som regel sortert, men ikke alltid!)
+    sentrumDepartures.sort((a, b) =>
+        new Date(a.expectedArrivalTime || a.aimedArrivalTime) -
+        new Date(b.expectedArrivalTime || b.aimedArrivalTime)
+    );
 
-            // After updating the DOM, try to fit everything
-            fitToViewport();
-        }
+    otherDepartures.sort((a, b) =>
+        new Date(a.expectedArrivalTime || a.aimedArrivalTime) -
+        new Date(b.expectedArrivalTime || b.aimedArrivalTime)
+    );
+
+    // 🚨 HER BEHOLDER VI KUN DE FEM FØRSTE I HVER RETNING
+    sentrumDepartures = sentrumDepartures.slice(0, 5);
+    otherDepartures = otherDepartures.slice(0, 5);
+
+    const containerSentrum = document.getElementById("departuresSentrum");
+    const containerOtherWay = document.getElementById("departuresOtherWay");
+
+    containerSentrum.innerHTML = "";
+    containerOtherWay.innerHTML = "";
+
+    // Tegn sentrum
+    sentrumDepartures.forEach(call => {
+        const frontText = call.destinationDisplay.frontText || "";
+        const lineId = (call.serviceJourney?.journeyPattern?.line?.id || "").split(":").pop();
+        const expectedArrival = new Date(call.expectedArrivalTime || call.aimedArrivalTime);
+
+        const div = document.createElement("div");
+        div.classList.add("departures");
+        div.innerHTML = `
+            <div class="lineBox">
+                <span class="lineNumber">${lineId}</span>
+                <span class="lineName">${frontText}</span>
+            </div>
+            <span class="departureTime">${formatDepartureTime(expectedArrival)}</span>
+        `;
+        containerSentrum.appendChild(div);
+    });
+
+    // Tegn andre retningen
+    otherDepartures.forEach(call => {
+        const frontText = call.destinationDisplay.frontText || "";
+        const lineId = (call.serviceJourney?.journeyPattern?.line?.id || "").split(":").pop();
+        const expectedArrival = new Date(call.expectedArrivalTime || call.aimedArrivalTime);
+
+        const div = document.createElement("div");
+        div.classList.add("departures");
+        div.innerHTML = `
+            <div class="lineBox">
+                <span class="lineNumber">${lineId}</span>
+                <span class="lineName">${frontText}</span>
+            </div>
+            <span class="departureTime">${formatDepartureTime(expectedArrival)}</span>
+        `;
+        containerOtherWay.appendChild(div);
+    });
+
+    fitToViewport();
+}
+
 
         /* ---------- RESPONSIVE: two-column + scaling logic ----------
 
