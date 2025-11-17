@@ -233,7 +233,7 @@
                             stopPlace(id: "NSR:StopPlace:6435") {
                                 id
                                 name
-                                estimatedCalls(timeRange: 72100, numberOfDepartures: 10) {
+                                estimatedCalls(timeRange: 72100, numberOfDepartures: 12) {
                                     realtime
                                     aimedArrivalTime
                                     expectedArrivalTime
@@ -308,6 +308,8 @@
                     else containerOtherWay.appendChild(div);
                 }
             }
+            sentrumDepartures = sentrumDepartures.slice(0, 5);
+            otherDepartures = otherDepartures.slice(0, 5);
 
             // After updating the DOM, try to fit everything
             fitToViewport();
