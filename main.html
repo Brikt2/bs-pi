@@ -270,7 +270,7 @@
             if (timeDiff <= 0) return "nå";
             if (timeDiff <= 15) return timeDiff + " min";
 
-            return expectedArrival.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            return expectedArrival.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: 'false'});
         }
 
         function showDepartures() {
