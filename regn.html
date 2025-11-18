@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>YR-lignende linjegraf</title>
+<style>
+  html,body{
+    height:100%;margin:0;
+    background:#0b2540; /* YR-lignende mørk blå */
+    overflow:hidden;
+  }
+  canvas{
+    display:block;
+    width:100vw;
+    height:100vh;
+  }
+  #tooltip{
+    position:fixed;
+    padding:4px 8px;
+    background:#ffffff;
+    color:#003;
+    border-radius:6px;
+    font-family:system-ui;
+    font-size:12px;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .1s;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="tooltip"></div>
+
+<script>
+(async function(){
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  const tooltip = document.getElementById("tooltip");
+
+  function resizeCanvas(){
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  resizeCanvas();
+  addEventListener("resize", resizeCanvas);
+
+  const LAT = 59.9111;
+  const LON = 10.7528;
+  const proxyPrefix = ""; // hvis du setter opp proxy
+
+  function clear(){
+    ctx.fillStyle = "#0b2540";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+  }
+
+  function drawLoading(){
+    clear();
+    ctx.fillStyle = "#fff";
+    ctx.font = "20px system-ui";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Laster …", canvas.width/2, canvas.height/2);
+  }
+  drawLoading();
+
+  async function fetchData(){
+    const url =
+      `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${LAT}&lon=${LON}`;
+
+    const final = proxyPrefix
+      ? proxyPrefix + encodeURIComponent(url)
+      : url;
+
+    const resp = await fetch(final, {
+      headers:{ "Accept":"application/json" }
+    });
+    return resp.json();
+  }
+
+  function getPrecipBuckets(data){
+    const series = data.properties.timeseries;
+    const now = new Date();
+    const minutes = 90;
+    const mins = new Array(minutes).fill(0);
+
+    for(const item of series){
+      const t = new Date(item.time);
+      const mm1h = item?.data?.next_1_hours?.details?.precipitation_amount;
+
+      if(typeof mm1h === "number"){
+        const start = (t - now) / 60000;
+        const end = start + 60;
+
+        const s = Math.max(0, Math.floor(start));
+        const e = Math.min(minutes, Math.ceil(end));
+
+        for(let i=s;i<e;i++){
+          mins[i] += mm1h / 60;
+        }
+      }
+    }
+
+    const bucketSize = 6;
+    const buckets = [];
+    for(let i=0;i<minutes;i+=bucketSize){
+      const slice = mins.slice(i,i+bucketSize);
+      buckets.push(slice.reduce((a,b)=>a+b,0));
+    }
+
+    return buckets;
+  }
+
+  function drawLineGraph(buckets){
+    clear();
+    const W = canvas.width / (window.devicePixelRatio||1);
+    const H = canvas.height / (window.devicePixelRatio||1);
+
+    const pad = 40;
+    const chartW = W - pad*2;
+    const chartH = H - pad*2;
+    const maxVal = Math.max(...buckets, 0.1);
+
+    // Grid (veldig subtil, YR-style)
+    ctx.strokeStyle = "rgba(255,255,255,0.05)";
+    ctx.lineWidth = 1;
+
+    const lines = 5;
+    for(let i=0;i<=lines;i++){
+      const y = pad + (chartH * i / lines);
+      ctx.beginPath();
+      ctx.moveTo(pad, y);
+      ctx.lineTo(pad + chartW, y);
+      ctx.stroke();
+    }
+
+    // Linje banepunkter
+    const pts = buckets.map((v,i)=>{
+      const x = pad + (i/(buckets.length-1)) * chartW;
+      const y = pad + chartH - (v/maxVal)*(chartH-10);
+      return {x,y,val:v};
+    });
+
+    // Myk kurve (bezier smoothing)
+    function curve(p0,p1,p2,p3,t){
+      return (
+        Math.pow(1-t,3)*p0 +
+        3*Math.pow(1-t,2)*t*p1 +
+        3*(1-t)*Math.pow(t,2)*p2 +
+        Math.pow(t,3)*p3
+      );
+    }
+
+    // Glow-linje (bred og diffus)
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = "rgba(255,255,255,0.25)";
+    ctx.beginPath();
+    for(let i=0;i<pts.length;i++){
+      if(i===0) ctx.moveTo(pts[i].x, pts[i].y);
+      else ctx.lineTo(pts[i].x, pts[i].y);
+    }
+    ctx.stroke();
+
+    // Hovedlinje (tynn hvit)
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "rgba(255,255,255,0.9)";
+    ctx.beginPath();
+    for(let i=0;i<pts.length;i++){
+      if(i===0) ctx.moveTo(pts[i].x, pts[i].y);
+      else ctx.lineTo(pts[i].x, pts[i].y);
+    }
+    ctx.stroke();
+
+    return pts;
+  }
+
+  // === Fetch + draw ===
+  let data;
+  try{
+    data = await fetchData();
+    console.log("MET DATA:", data);
+  }catch(e){
+    drawLoading();
+    return;
+  }
+
+  const buckets = getPrecipBuckets(data);
+  console.log("BUCKETS:", buckets);
+
+  const points = drawLineGraph(buckets);
+
+  // === Tooltip (som YR) ===
+  canvas.addEventListener("mousemove", e=>{
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Finn nærmeste punkt
+    let closest = null;
+    let dist = 99999;
+    for(const p of points){
+      const d = Math.abs(p.x - x);
+      if(d < dist){
+        dist = d;
+        closest = p;
+      }
+    }
+
+    if(closest){
+      tooltip.style.left = (closest.x + rect.left + 10) + "px";
+      tooltip.style.top = (closest.y + rect.top - 10) + "px";
+      tooltip.textContent = (closest.val).toFixed(2) + " mm";
+      tooltip.style.opacity = 1;
+    }
+  });
+
+  canvas.addEventListener("mouseleave", ()=>{
+    tooltip.style.opacity = 0;
+  });
+
+})();
+</script>
+</body>
+</html>
