@@ -9,6 +9,7 @@
     height:100%;margin:0;
     background:#0b2540; /* YR-lignende mørk blå */
     overflow:hidden;
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Inter","Helvetica Neue",Arial;
   }
   canvas{
     display:block;
@@ -21,7 +22,7 @@
     background:#ffffff;
     color:#003;
     border-radius:6px;
-    font-family:system-ui;
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Inter","Helvetica Neue",Arial;
     font-size:12px;
     pointer-events:none;
     opacity:0;
@@ -58,6 +59,13 @@
     ctx.fillStyle = "#0b2540";
     ctx.fillRect(0,0,canvas.width,canvas.height);
   }
+  function drawHeader(text){
+  ctx.fillStyle = "rgba(255,255,255,0.85)";
+  ctx.font = "600 22px system-ui,-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',Arial";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillText(text, 40, 20);
+}
 
   function drawLoading(){
     clear();
@@ -139,6 +147,21 @@
       ctx.stroke();
     }
 
+    const quarterIndices = [3, 6, 9, 12];
+
+    ctx.strokeStyle = "rgba(255,255,255,0.08)";
+    ctx.lineWidth = 1;
+
+quarterIndices.forEach(i => {
+  if (i < buckets.length) {
+    const x = pad + (i / (buckets.length - 1)) * chartW;
+    ctx.beginPath();
+    ctx.moveTo(x, pad);
+    ctx.lineTo(x, pad + chartH);
+    ctx.stroke();
+  }
+});
+
     // Linje banepunkter
     const pts = buckets.map((v,i)=>{
       const x = pad + (i/(buckets.length-1)) * chartW;
@@ -190,9 +213,17 @@
   }
 
   const buckets = getPrecipBuckets(data);
-  console.log("BUCKETS:", buckets);
+console.log("BUCKETS:", buckets);
 
-  const points = drawLineGraph(buckets);
+// Overskrift hvis ingen nedbør
+const noRain = buckets.every(v => v === 0);
+
+clear();
+if (noRain) {
+  drawHeader("Ingen nedbør neste 90 minutt");
+}
+const points = drawLineGraph(buckets);
+
 
   // === Tooltip (som YR) ===
   canvas.addEventListener("mousemove", e=>{
