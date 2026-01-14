@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
-<title>Portrait Video – BrightSign Safe</title>
+<title>BrightAuthor Rotated – Safe</title>
 
 <style>
 html, body {
@@ -11,25 +11,11 @@ html, body {
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden;
   background: black;
+  overflow: hidden;
 }
 
-/* Hele scenen roteres – ikke video direkte */
-#stage {
-  position: absolute;
-  width: 100vh;
-  height: 100vw;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(90deg);
-  transform-origin: center;
-  overflow: hidden;
-  background: black;
-}
-
-/* Video fyller scenen korrekt */
-#stage video {
+video {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -40,12 +26,10 @@ html, body {
 
 <body>
 
-<div id="stage">
-  <video autoplay muted loop playsinline>
-    <source src="video.mp4" type="video/mp4">
-    Nettleseren støtter ikke HTML5-video.
-  </video>
-</div>
+<video autoplay muted loop playsinline>
+  <source src="video.mp4" type="video/mp4">
+  Nettleseren støtter ikke HTML5-video.
+</video>
 
 </body>
 </html>
