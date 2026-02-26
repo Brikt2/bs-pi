@@ -500,32 +500,11 @@
     </div>
     <div class="oppå">
       <div class="bjelle1">
-        <span data-emoji="https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f514.svg">🔔</span>
+        <span class="bell belll">🔔</span>
       </div>
       <div class="bjelle2">
         <span class="bell belll">
-          <span data-emoji="https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f514.svg">🔔</span>
-          <script>
-            document.addEventListener("DOMContentLoaded", () => {
-              document.querySelectorAll("[data-emoji]").forEach((element) => {
-                const imageUrl = element.getAttribute("data-emoji");
-                if (!imageUrl) return;
-
-                const img = document.createElement("img");
-                img.src = imageUrl;
-
-                const textStyle = window.getComputedStyle(element);
-                const adjustedHeight = parseFloat(textStyle.fontSize) * 1.0;
-
-                img.style.height = adjustedHeight + "px";
-                img.style.width = "auto";
-                img.style.verticalAlign = "text-top";
-
-                element.innerHTML = "";
-                element.appendChild(img);
-              });
-            });
-          </script>
+          <span data-emoji="https://cdn.jsdelivr.net/npm/openmoji@14.0.0/color/svg/1F514.svg">🔔</span>
         </span>
       </div>
     </div>
@@ -539,6 +518,25 @@
     </div>
 
     <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll("[data-emoji]").forEach((element) => {
+          const imageUrl = element.getAttribute("data-emoji");
+          if (!imageUrl) return;
+
+          const img = document.createElement("img");
+          img.src = imageUrl;
+
+          const textStyle = window.getComputedStyle(element);
+          const adjustedHeight = parseFloat(textStyle.fontSize) * 1.0;
+
+          img.style.height = adjustedHeight + "px";
+          img.style.width = "auto";
+          img.style.verticalAlign = "text-top";
+
+          element.innerHTML = "";
+          element.appendChild(img);
+        });
+      });
       const bells = document.querySelectorAll(".bell");
 
       function startRing(bell) {
