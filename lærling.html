@@ -367,122 +367,6 @@
           gap: 8px;
         }
       }
-
-      .pyro {
-        position: absolute;
-        top: 30%;
-        left: 50%;
-        width: 0;
-        height: 0;
-      }
-
-      .particle {
-        position: absolute;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: hsl(calc(360 * var(--i)), 100%, 50%);
-        animation: explode 1s ease-out forwards;
-      }
-
-      .particle:nth-child(1) {
-        --i: 0;
-        transform: translate(0, 0);
-      }
-      .particle:nth-child(2) {
-        --i: 0.2;
-        transform: translate(0, 0);
-      }
-      .particle:nth-child(3) {
-        --i: 0.4;
-        transform: translate(0, 0);
-      }
-      .particle:nth-child(4) {
-        --i: 0.6;
-        transform: translate(0, 0);
-      }
-      .particle:nth-child(5) {
-        --i: 0.8;
-        transform: translate(0, 0);
-      }
-
-      @keyframes explode {
-        0% {
-          transform: translate(0, 0);
-          opacity: 1;
-        }
-        100% {
-          transform: translate(calc(var(--x) * 100px), calc(var(--y) * -100px));
-          opacity: 0;
-        }
-      }
-
-      /* Legg til tilfeldig retning for hver partikkel */
-      .particle:nth-child(1) {
-        --x: 1;
-        --y: 1;
-      }
-      .particle:nth-child(2) {
-        --x: -1;
-        --y: 1;
-      }
-      .particle:nth-child(3) {
-        --x: 0.5;
-        --y: 1;
-      }
-      .particle:nth-child(4) {
-        --x: -0.5;
-        --y: 1;
-      }
-      .particle:nth-child(5) {
-        --x: 0;
-        --y: 1;
-      }
-
-      .firework:nth-child(4),
-      .firework:nth-child(4)::before,
-      .firework:nth-child(4)::after {
-        --color1: orange;
-        --color2: orangered;
-        --color3: yellow;
-        --color4: gold;
-        --color5: coral;
-        --color6: tomato;
-        --finalSize: 60vmin;
-        left: 25%;
-        top: 55%;
-        animation-delay: -0.3s;
-      }
-
-      .firework:nth-child(5),
-      .firework:nth-child(5)::before,
-      .firework:nth-child(5)::after {
-        --color1: purple;
-        --color2: violet;
-        --color3: orchid;
-        --color4: plum;
-        --color5: fuchsia;
-        --color6: mediumorchid;
-        --finalSize: 65vmin;
-        left: 75%;
-        top: 50%;
-        animation-delay: -0.35s;
-      }
-
-      .firework:nth-child(6),
-      .firework:nth-child(6)::before,
-      .firework:nth-child(6)::after {
-        --color1: lime;
-        --color2: lightgreen;
-        --color3: chartreuse;
-        --color4: springgreen;
-        --color5: greenyellow;
-        --color6: palegreen;
-        --finalSize: 55vmin;
-        left: 50%;
-        top: 40%;
-        animation-delay: -0.4s;
-      }
     </style>
   </head>
   <body>
@@ -521,53 +405,108 @@
     </div>
 
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        document.querySelectorAll("[data-emoji]").forEach((element) => {
-          const imageUrl = element.getAttribute("data-emoji");
-          if (!imageUrl) return;
+    /* ---------- WAIT FOR REAL RENDER (BrightSign fix) ---------- */
+    window.onload = function() {
 
-          const img = document.createElement("img");
-          img.src = imageUrl;
+      /* -------- NAVN LOOP (safe repaint) -------- */
+      const names = document.getElementsByClassName("navn");
+      let index = 0;
 
-          const textStyle = window.getComputedStyle(element);
-          const adjustedHeight = parseFloat(textStyle.fontSize) * 1.0;
+      function changeName(){
+        names[index].classList.remove("active");
+        index = (index + 1) % names.length;
+        names[index].classList.add("active");
+      }
 
-          img.style.height = adjustedHeight + "px";
-          img.style.width = "auto";
-          img.style.verticalAlign = "text-top";
+      setInterval(changeName, 2500);
 
-          element.innerHTML = "";
-          element.appendChild(img);
-        });
-      });
-      const bells = document.querySelectorAll(".bell");
 
-      function startRing(bell) {
+      /* -------- BELLS (reliable animation restart) -------- */
+      const bells = document.getElementsByClassName("bell");
+
+      function ringLoop(bell){
         bell.style.animation = "none";
-        void bell.offsetHeight;
-        bell.style.animation = "bell-keyframes 1s 1";
-      }
 
-      bells.forEach((bell) => {
-        bell.addEventListener("animationend", () => {
-          setTimeout(() => startRing(bell), 300);
+        requestAnimationFrame(()=>{
+          requestAnimationFrame(()=>{
+            bell.style.animation = "bell-keyframes 1s linear";
+          });
         });
 
-        startRing(bell);
-      });
-
-      const navn = document.querySelectorAll(".navn");
-      let current = 0;
-
-      function loopNavn() {
-        navn[current].classList.remove("active");
-
-        current = (current + 1) % navn.length;
-
-        navn[current].classList.add("active");
+        setTimeout(()=>ringLoop(bell),1300);
       }
 
-      setInterval(loopNavn, 2500);
+      for(let i=0;i<bells.length;i++){
+        ringLoop(bells[i]);
+      }
+
+
+      /* -------- FIREWORKS (DOM particles instead of CSS gradients) -------- */
+
+      function spawnFirework(x,y){
+
+        const container = document.createElement("div");
+        container.style.position="absolute";
+        container.style.left=x+"px";
+        container.style.top=y+"px";
+        container.style.pointerEvents="none";
+        document.body.appendChild(container);
+
+        for(let i=0;i<24;i++){
+          const p=document.createElement("div");
+
+          const angle = (Math.PI*2/24)*i;
+          const speed = 80+Math.random()*80;
+
+          p.style.position="absolute";
+          p.style.width="6px";
+          p.style.height="6px";
+          p.style.borderRadius="50%";
+          p.style.background="hsl("+Math.random()*360+",100%,60%)";
+          p.style.transform="translate(0,0)";
+          p.style.opacity="1";
+
+          container.appendChild(p);
+
+          animateParticle(p,angle,speed);
+        }
+
+        setTimeout(()=>container.remove(),1200);
+      }
+
+      function animateParticle(el,angle,speed){
+        let start=null;
+
+        function frame(t){
+          if(!start) start=t;
+          const progress=(t-start)/1000;
+
+          if(progress>1){
+            el.style.opacity=0;
+            return;
+          }
+
+          const x=Math.cos(angle)*speed*progress;
+          const y=Math.sin(angle)*speed*progress;
+
+          el.style.transform="translate("+x+"px,"+y+"px)";
+          el.style.opacity=1-progress;
+
+          requestAnimationFrame(frame);
+        }
+
+        requestAnimationFrame(frame);
+      }
+
+      /* spawn loop */
+      setInterval(()=>{
+        spawnFirework(
+          Math.random()*window.innerWidth,
+          Math.random()*window.innerHeight*0.6
+        );
+      },900);
+
+    };
     </script>
   </body>
 </html>
