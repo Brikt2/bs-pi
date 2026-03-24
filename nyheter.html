@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <style>
+      .nyhet {
+        animation: slideIn 0.5s ease;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+    </style>
+    <div id="div"></div>
+    <script>
+      async function hent_nyheter() {
+        const nyheter_url = "https://www.nrk.no/stor-oslo/siste.rss";
+        const proxy_url = `https://api.rss2json.com/v1/api.json?rss_url=${nyheter_url}&api_key=gwggcsutiwlzxrleyq6k24dact4w4swgcvsd9qmq&t=${Date.now()}`;
+
+        const respons = await fetch(proxy_url);
+        const data = await respons.json();
+        console.log(data);
+        vis_nyhet1(data);
+      }
+      hent_nyheter();
+
+      function vis_nyhet1(data) {
+        const nyheter = data.items.filter((nyhet) => nyhet.enclosure.link);
+        const nyhet1 = nyheter[0];
+        const nyhet2 = nyheter[1];
+        const nyhet3 = nyheter[2];
+        const boks = document.getElementById("div");
+        boks.innerHTML = "";
+        const div = document.createElement("div");
+        div.classList.add("nyhet");
+        div.innerHTML = `<h1>${nyhet1.title}</h1>
+        <p>${nyhet1.description}</p>
+        <img src='${nyhet1.enclosure.link}'></img>`;
+        boks.appendChild(div);
+        setTimeout(() => vis_nyhet2(nyhet2, nyhet3), 20000);
+      }
+
+      function vis_nyhet2(nyhet2, nyhet3) {
+        const boks = document.getElementById("div");
+        boks.innerHTML = "";
+        const div = document.createElement("div");
+        div.innerHTML = "";
+        div.classList.add("nyhet");
+        div.innerHTML = `<h1>${nyhet2.title}</h1>
+        <p>${nyhet2.description}</p>
+        <img src='${nyhet2.enclosure.link}'></img>`;
+        boks.appendChild(div);
+        setTimeout(() => vis_nyhet3(nyhet3), 20000);
+      }
+
+      function vis_nyhet3(nyhet3) {
+        const boks = document.getElementById("div");
+        boks.innerHTML = "";
+        const div = document.createElement("div");
+        div.innerHTML = "";
+        div.classList.add("nyhet");
+        div.innerHTML = `<h1>${nyhet3.title}</h1>
+        <p>${nyhet3.description}</p>
+        <img src='${nyhet3.enclosure.link}'></img>`;
+        boks.appendChild(div);
+        setTimeout(hent_nyheter, 20000);
+      }
+    </script>
+  </body>
+</html>
