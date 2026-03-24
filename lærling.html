@@ -1,424 +1,405 @@
 <!doctype html>
 <html lang="no">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Gratulerer med lærlingplass!</title>
-    <style>
-      /* Reset */
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-        z-index: 1;
-      }
 
-      :root {
-        --bg: #0f1724;
-        --panel: #0b1220;
-        --text: #e6eef8;
-        --accent: #0ea5a4;
-      }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gratulerer med lærlingplass!</title>
+  <style>
+    /* Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      z-index: 1;
+    }
 
-      html,
-      body {
-        height: 100%;
-        background: linear-gradient(180deg, var(--bg), #071020 90%);
-        color: var(--text);
-        font-family:
-          Inter,
-          system-ui,
-          -apple-system,
-          "Segoe UI",
-          Roboto,
-          "Helvetica Neue",
-          Arial;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
+    :root {
+      --bg: #0f1724;
+      --panel: #0b1220;
+      --text: #e6eef8;
+      --accent: #0ea5a4;
+    }
 
-      .gratulerer {
-        font-size: 80px;
-        text-align: center;
-      }
+    html,
+    body {
+      height: 100%;
+      background: linear-gradient(180deg, var(--bg), #071020 90%);
+      color: var(--text);
+      font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        "Segoe UI",
+        Roboto,
+        "Helvetica Neue",
+        Arial;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-      .wrap {
-        min-height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 24px;
-      }
-      .navn-wrapper {
-        position: relative;
-        height: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 60px;
-        font-weight: 900;
-      }
+    .gratulerer {
+      font-size: 80px;
+      text-align: center;
+    }
 
-      .navn {
-        position: absolute;
-        opacity: 0;
-        filter: blur(20px);
-        transform: scale(1.1);
-        transition:
-          opacity 0.8s ease,
-          filter 0.8s ease,
-          transform 0.8s ease;
-      }
+    .wrap {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
 
-      .navn.active {
-        opacity: 1;
-        filter: blur(0);
-        transform: scale(1);
-      }
+    .navn-wrapper {
+      position: relative;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 60px;
+      font-weight: 900;
+    }
 
-      .boks {
-        width: min(360px, 92vw);
-        max-width: 1200px;
-        background: linear-gradient(
-          180deg,
+    .navn {
+      position: absolute;
+      opacity: 0;
+      filter: blur(20px);
+      transform: scale(1.1);
+      white-space: nowrap;
+      transition:
+        opacity 0.8s ease,
+        filter 0.8s ease,
+        transform 0.8s ease;
+    }
+
+    .navn.active {
+      opacity: 1;
+      filter: blur(0);
+      transform: scale(1);
+    }
+
+    .boks {
+      width: min(360px, 92vw);
+      max-width: 1200px;
+      background: linear-gradient(180deg,
           rgba(255, 255, 255, 0.02),
-          rgba(255, 255, 255, 0.01)
-        );
-        border-radius: 18px;
-        box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
-        padding: clamp(20px, 4vw, 40px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+          rgba(255, 255, 255, 0.01));
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
+      padding: clamp(20px, 4vw, 40px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .oppå {
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      left: 0px;
+      top: 0px;
+    }
+
+    .opperst {
+      z-index: 20;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      /* background: linear-gradient(#0007, #0000),#123; */
+      margin: 0;
+      overflow: hidden;
+    }
+
+    @keyframes firework {
+      0% {
+        transform: translate(var(--x), var(--initialY));
+        width: var(--initialSize);
+        opacity: 1;
       }
 
-      .oppå {
-        z-index: 10;
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        left: 0px;
-        top: 0px;
+      50% {
+        width: 0.5vmin;
+        opacity: 1;
       }
 
-      .opperst {
-        z-index: 20;
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        left: 0px;
-        top: 0px;
-        /* background: linear-gradient(#0007, #0000),#123; */
-        margin: 0;
-        overflow: hidden;
+      100% {
+        width: var(--finalSize);
+        opacity: 0;
       }
+    }
 
-      @keyframes firework {
-        0% {
-          transform: translate(var(--x), var(--initialY));
-          width: var(--initialSize);
-          opacity: 1;
-        }
-        50% {
-          width: 0.5vmin;
-          opacity: 1;
-        }
-        100% {
-          width: var(--finalSize);
-          opacity: 0;
-        }
-      }
-
-      /* @keyframes fireworkPseudo {
+    /* @keyframes fireworkPseudo {
     0% { transform: translate(-50%, -50%); width: var(--initialSize); opacity: 1; }
     50% { width: 0.5vmin; opacity: 1; }
     100% { width: var(--finalSize); opacity: 0; }
   }
   */
-      .firework,
-      .firework::before,
-      .firework::after {
-        --initialSize: 1vmin;
-        --finalSize: 85vmin;
-        --particleSize: 50vmin;
-        --color1: yellow;
-        --color2: khaki;
-        --color3: white;
-        --color4: lime;
-        --color5: gold;
-        --color6: mediumseagreen;
-        --y: -30vmin;
-        --x: -50%;
-        --initialY: 60vmin;
-        content: "";
-        animation: firework 2s infinite;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, var(--y));
-        width: var(--initialSize);
-        aspect-ratio: 1;
-        background: 
-      /*
+    .firework,
+    .firework::before,
+    .firework::after {
+      --initialSize: 1vmin;
+      --finalSize: 85vmin;
+      --particleSize: 50vmin;
+      --color1: yellow;
+      --color2: khaki;
+      --color3: white;
+      --color4: lime;
+      --color5: gold;
+      --color6: mediumseagreen;
+      --y: -30vmin;
+      --x: -50%;
+      --initialY: 60vmin;
+      content: "";
+      animation: firework 2s infinite;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, var(--y));
+      width: var(--initialSize);
+      aspect-ratio: 1;
+      background:
+        /*
       radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 0% 0%,
       radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 100% 0%,
       radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 100% 100%,
       radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 0% 100%,
       */
-          radial-gradient(circle, var(--color1) var(--particleSize), #0000 0)
-            50% 0%,
-          radial-gradient(circle, var(--color2) var(--particleSize), #0000 0)
-            100% 50%,
-          radial-gradient(circle, var(--color3) var(--particleSize), #0000 0)
-            50% 100%,
-          radial-gradient(circle, var(--color4) var(--particleSize), #0000 0) 0%
-            50%,
-          /* bottom right */
-          radial-gradient(circle, var(--color5) var(--particleSize), #0000 0)
-            80% 90%,
-          radial-gradient(circle, var(--color6) var(--particleSize), #0000 0)
-            95% 90%,
-          radial-gradient(circle, var(--color1) var(--particleSize), #0000 0)
-            90% 70%,
-          radial-gradient(circle, var(--color2) var(--particleSize), #0000 0)
-            100% 60%,
-          radial-gradient(circle, var(--color3) var(--particleSize), #0000 0)
-            55% 80%,
-          radial-gradient(circle, var(--color4) var(--particleSize), #0000 0)
-            70% 77%,
-          /* bottom left */
-          radial-gradient(circle, var(--color5) var(--particleSize), #0000 0)
-            22% 90%,
-          radial-gradient(circle, var(--color6) var(--particleSize), #0000 0)
-            45% 90%,
-          radial-gradient(circle, var(--color1) var(--particleSize), #0000 0)
-            33% 70%,
-          radial-gradient(circle, var(--color2) var(--particleSize), #0000 0)
-            10% 60%,
-          radial-gradient(circle, var(--color3) var(--particleSize), #0000 0)
-            31% 80%,
-          radial-gradient(circle, var(--color4) var(--particleSize), #0000 0)
-            28% 77%,
-          radial-gradient(circle, var(--color5) var(--particleSize), #0000 0)
-            13% 72%,
-          /* top left */
-          radial-gradient(circle, var(--color6) var(--particleSize), #0000 0)
-            80% 10%,
-          radial-gradient(circle, var(--color1) var(--particleSize), #0000 0)
-            95% 14%,
-          radial-gradient(circle, var(--color2) var(--particleSize), #0000 0)
-            90% 23%,
-          radial-gradient(circle, var(--color3) var(--particleSize), #0000 0)
-            100% 43%,
-          radial-gradient(circle, var(--color4) var(--particleSize), #0000 0)
-            85% 27%,
-          radial-gradient(circle, var(--color5) var(--particleSize), #0000 0)
-            77% 37%,
-          radial-gradient(circle, var(--color6) var(--particleSize), #0000 0)
-            60% 7%,
-          /* top right */
-          radial-gradient(circle, var(--color1) var(--particleSize), #0000 0)
-            22% 14%,
-          radial-gradient(circle, var(--color1) var(--particleSize), #0000 0)
-            45% 20%,
-          radial-gradient(circle, var(--color1) var(--particleSize), #0000 0)
-            33% 34%,
-          radial-gradient(circle, var(--color1) var(--particleSize), #0000 0)
-            10% 29%,
-          radial-gradient(circle, var(--color1) var(--particleSize), #0000 0)
-            31% 37%,
-          radial-gradient(circle, var(--color1) var(--particleSize), #0000 0)
-            28% 7%,
-          radial-gradient(circle, var(--color1) var(--particleSize), #0000 0)
-            13% 42%;
-        background-size: var(--initialSize) var(--initialSize);
-        background-repeat: no-repeat;
+        radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 50% 0%,
+        radial-gradient(circle, var(--color2) var(--particleSize), #0000 0) 100% 50%,
+        radial-gradient(circle, var(--color3) var(--particleSize), #0000 0) 50% 100%,
+        radial-gradient(circle, var(--color4) var(--particleSize), #0000 0) 0% 50%,
+        /* bottom right */
+        radial-gradient(circle, var(--color5) var(--particleSize), #0000 0) 80% 90%,
+        radial-gradient(circle, var(--color6) var(--particleSize), #0000 0) 95% 90%,
+        radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 90% 70%,
+        radial-gradient(circle, var(--color2) var(--particleSize), #0000 0) 100% 60%,
+        radial-gradient(circle, var(--color3) var(--particleSize), #0000 0) 55% 80%,
+        radial-gradient(circle, var(--color4) var(--particleSize), #0000 0) 70% 77%,
+        /* bottom left */
+        radial-gradient(circle, var(--color5) var(--particleSize), #0000 0) 22% 90%,
+        radial-gradient(circle, var(--color6) var(--particleSize), #0000 0) 45% 90%,
+        radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 33% 70%,
+        radial-gradient(circle, var(--color2) var(--particleSize), #0000 0) 10% 60%,
+        radial-gradient(circle, var(--color3) var(--particleSize), #0000 0) 31% 80%,
+        radial-gradient(circle, var(--color4) var(--particleSize), #0000 0) 28% 77%,
+        radial-gradient(circle, var(--color5) var(--particleSize), #0000 0) 13% 72%,
+        /* top left */
+        radial-gradient(circle, var(--color6) var(--particleSize), #0000 0) 80% 10%,
+        radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 95% 14%,
+        radial-gradient(circle, var(--color2) var(--particleSize), #0000 0) 90% 23%,
+        radial-gradient(circle, var(--color3) var(--particleSize), #0000 0) 100% 43%,
+        radial-gradient(circle, var(--color4) var(--particleSize), #0000 0) 85% 27%,
+        radial-gradient(circle, var(--color5) var(--particleSize), #0000 0) 77% 37%,
+        radial-gradient(circle, var(--color6) var(--particleSize), #0000 0) 60% 7%,
+        /* top right */
+        radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 22% 14%,
+        radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 45% 20%,
+        radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 33% 34%,
+        radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 10% 29%,
+        radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 31% 37%,
+        radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 28% 7%,
+        radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 13% 42%;
+      background-size: var(--initialSize) var(--initialSize);
+      background-repeat: no-repeat;
+    }
+
+    .firework::before {
+      --x: -50%;
+      --y: -50%;
+      --initialY: -50%;
+      /*   transform: translate(-20vmin, -2vmin) rotate(40deg) scale(1.3) rotateY(40deg); */
+      transform: translate(-50%, -50%) rotate(40deg) scale(1.3) rotateY(40deg);
+      /*   animation: fireworkPseudo 2s infinite; */
+    }
+
+    .firework::after {
+      --x: -50%;
+      --y: -50%;
+      --initialY: -50%;
+      /*   transform: translate(44vmin, -50%) rotate(170deg) scale(1.15) rotateY(-30deg); */
+      transform: translate(-50%, -50%) rotate(170deg) scale(1.15) rotateY(-30deg);
+      /*   animation: fireworkPseudo 2s infinite; */
+    }
+
+    .firework:nth-child(2) {
+      --x: 30vmin;
+    }
+
+    .firework:nth-child(2),
+    .firework:nth-child(2)::before,
+    .firework:nth-child(2)::after {
+      --color1: pink;
+      --color2: violet;
+      --color3: fuchsia;
+      --color4: orchid;
+      --color5: plum;
+      --color6: lavender;
+      --finalSize: 70vmin;
+      left: 30%;
+      top: 60%;
+      animation-delay: -0.25s;
+    }
+
+    .firework:nth-child(3) {
+      --x: -30vmin;
+      --y: -50vmin;
+    }
+
+    .firework:nth-child(3),
+    .firework:nth-child(3)::before,
+    .firework:nth-child(3)::after {
+      --color1: cyan;
+      --color2: lightcyan;
+      --color3: lightblue;
+      --color4: PaleTurquoise;
+      --color5: SkyBlue;
+      --color6: lavender;
+      --finalSize: 35vmin;
+      left: 70%;
+      top: 60%;
+      animation-delay: -0.4s;
+    }
+
+    .bjelle1 {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      rotate: -30deg;
+    }
+
+    .bjelle2 {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      rotate: 30deg;
+    }
+
+    .container {
+      margin-top: 16px;
+      min-height: 300px;
+      background: #f0f0f0;
+      border: 4px solid cornflowerblue;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes bell-keyframes {
+      0% {
+        transform: rotate(0deg);
       }
 
-      .firework::before {
-        --x: -50%;
-        --y: -50%;
-        --initialY: -50%;
-        /*   transform: translate(-20vmin, -2vmin) rotate(40deg) scale(1.3) rotateY(40deg); */
-        transform: translate(-50%, -50%) rotate(40deg) scale(1.3) rotateY(40deg);
-        /*   animation: fireworkPseudo 2s infinite; */
+      10% {
+        transform: rotate(21deg);
       }
 
-      .firework::after {
-        --x: -50%;
-        --y: -50%;
-        --initialY: -50%;
-        /*   transform: translate(44vmin, -50%) rotate(170deg) scale(1.15) rotateY(-30deg); */
-        transform: translate(-50%, -50%) rotate(170deg) scale(1.15)
-          rotateY(-30deg);
-        /*   animation: fireworkPseudo 2s infinite; */
+      20% {
+        transform: rotate(-14deg);
       }
 
-      .firework:nth-child(2) {
-        --x: 30vmin;
+      30% {
+        transform: rotate(21deg);
       }
 
-      .firework:nth-child(2),
-      .firework:nth-child(2)::before,
-      .firework:nth-child(2)::after {
-        --color1: pink;
-        --color2: violet;
-        --color3: fuchsia;
-        --color4: orchid;
-        --color5: plum;
-        --color6: lavender;
-        --finalSize: 70vmin;
-        left: 30%;
-        top: 60%;
-        animation-delay: -0.25s;
+      40% {
+        transform: rotate(-10deg);
       }
 
-      .firework:nth-child(3) {
-        --x: -30vmin;
-        --y: -50vmin;
+      50% {
+        transform: rotate(18deg);
       }
 
-      .firework:nth-child(3),
-      .firework:nth-child(3)::before,
-      .firework:nth-child(3)::after {
-        --color1: cyan;
-        --color2: lightcyan;
-        --color3: lightblue;
-        --color4: PaleTurquoise;
-        --color5: SkyBlue;
-        --color6: lavender;
-        --finalSize: 35vmin;
-        left: 70%;
-        top: 60%;
-        animation-delay: -0.4s;
+      60% {
+        transform: rotate(0deg);
       }
 
-      .bjelle1 {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        rotate: -30deg;
+      100% {
+        transform: rotate(0deg);
       }
-      .bjelle2 {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        rotate: 30deg;
+    }
+
+    .belll {
+      display: inline-block;
+      font-size: 128px;
+      filter: drop-shadow(0 10px 8px rgb(0 0 0 / 0.04)) drop-shadow(0 4px 3px rgb(0 0 0 / 0.1));
+    }
+
+    .bell-animation {
+      animation-duration: 1s;
+      animation-iteration-count: var(--times, 1);
+      animation-name: bell-keyframes;
+      transform-origin: top center;
+    }
+
+    @media (max-width: 420px) {
+      .clock {
+        padding: 12px;
+        border-radius: 12px;
       }
 
-      .container {
-        margin-top: 16px;
-        min-height: 300px;
-        background: #f0f0f0;
-        border: 4px solid cornflowerblue;
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      .hhmm {
+        gap: 8px;
       }
+    }
+  </style>
+</head>
 
-      @keyframes bell-keyframes {
-        0% {
-          transform: rotate(0deg);
-        }
-        10% {
-          transform: rotate(21deg);
-        }
-        20% {
-          transform: rotate(-14deg);
-        }
-        30% {
-          transform: rotate(21deg);
-        }
-        40% {
-          transform: rotate(-10deg);
-        }
-        50% {
-          transform: rotate(18deg);
-        }
-        60% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(0deg);
-        }
-      }
-
-      .belll {
-        display: inline-block;
-        font-size: 128px;
-        filter: drop-shadow(0 10px 8px rgb(0 0 0 / 0.04))
-          drop-shadow(0 4px 3px rgb(0 0 0 / 0.1));
-      }
-
-      .bell-animation {
-        animation-duration: 1s;
-        animation-iteration-count: var(--times, 1);
-        animation-name: bell-keyframes;
-        transform-origin: top center;
-      }
-
-      @media (max-width: 420px) {
-        .clock {
-          padding: 12px;
-          border-radius: 12px;
-        }
-        .hhmm {
-          gap: 8px;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="wrap">
-      <h1 class="gratulerer">Gratulerer med lærlingplass</h1>
-      <div class="boks" role="region">
-        <div class="navn-wrapper">
-          <div class="navn active">Karim</div>
-          <div class="navn">Magnus S</div>
-          <div class="navn">Mats</div>
-          <div class="navn">Arne</div>
-          <div class="navn">Storm</div>
-          <div class="navn">Darin</div>
-          <div class="navn">Magnus A</div>
-          <div class="navn">Kine</div>
-          <div class="navn">Brikt</div>
-          <div class="navn">Markus</div>
-          <div class="navn">Simen</div>
-        </div>
+<body>
+  <div class="wrap">
+    <h1 class="gratulerer">Gratulerer med lærlingplass</h1>
+    <div class="boks" role="region">
+      <div class="navn-wrapper">
+        <div class="navn active">Karim</div>
+        <div class="navn">Magnus S</div>
+        <div class="navn">Mats</div>
+        <div class="navn">Arne</div>
+        <div class="navn">Storm</div>
+        <div class="navn">Darin</div>
+        <div class="navn">Magnus A</div>
+        <div class="navn">Kine</div>
+        <div class="navn">Brikt</div>
+        <div class="navn">Markus</div>
+        <div class="navn">Simen</div>
+        <div class="navn">Lykke</div>
       </div>
     </div>
-    <div class="oppå">
-      <div class="bjelle1">
-        <span class="bell belll">
-          <img src="bjelle.png">
-        </span>
-      </div>
-      <div class="bjelle2">
-        <span class="bell belll">
-          <img src="bjelle.png">
-        </span>
-      </div>
+  </div>
+  <div class="oppå">
+    <div class="bjelle1">
+      <span class="bell belll">
+        <img src="bjelle.png">
+      </span>
     </div>
-    <div class="opperst">
-      <div class="firework"></div>
-      <div class="firework"></div>
-      <div class="firework"></div>
-      <div class="firework"></div>
-      <div class="firework"></div>
-      <div class="firework"></div>
+    <div class="bjelle2">
+      <span class="bell belll">
+        <img src="bjelle.png">
+      </span>
     </div>
+  </div>
+  <div class="opperst">
+    <div class="firework"></div>
+    <div class="firework"></div>
+    <div class="firework"></div>
+    <div class="firework"></div>
+    <div class="firework"></div>
+    <div class="firework"></div>
+  </div>
 
-    <script>
+  <script>
     /* ---------- WAIT FOR REAL RENDER (BrightSign fix) ---------- */
-    window.onload = function() {
+    window.onload = function () {
 
       /* -------- NAVN LOOP (safe repaint) -------- */
       const names = document.getElementsByClassName("navn");
       let index = 0;
 
-      function changeName(){
+      function changeName() {
         names[index].classList.remove("active");
         index = (index + 1) % names.length;
         names[index].classList.add("active");
@@ -430,73 +411,73 @@
       /* -------- BELLS (reliable animation restart) -------- */
       const bells = document.getElementsByClassName("bell");
 
-      function ringLoop(bell){
+      function ringLoop(bell) {
         bell.style.animation = "none";
 
-        requestAnimationFrame(()=>{
-          requestAnimationFrame(()=>{
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
             bell.style.animation = "bell-keyframes 1s linear";
           });
         });
 
-        setTimeout(()=>ringLoop(bell),1300);
+        setTimeout(() => ringLoop(bell), 1300);
       }
 
-      for(let i=0;i<bells.length;i++){
+      for (let i = 0; i < bells.length; i++) {
         ringLoop(bells[i]);
       }
 
 
       /* -------- FIREWORKS (DOM particles instead of CSS gradients) -------- */
 
-      function spawnFirework(x,y){
+      function spawnFirework(x, y) {
 
         const container = document.createElement("div");
-        container.style.position="absolute";
-        container.style.left=x+"px";
-        container.style.top=y+"px";
-        container.style.pointerEvents="none";
+        container.style.position = "absolute";
+        container.style.left = x + "px";
+        container.style.top = y + "px";
+        container.style.pointerEvents = "none";
         document.body.appendChild(container);
 
-        for(let i=0;i<24;i++){
-          const p=document.createElement("div");
+        for (let i = 0; i < 24; i++) {
+          const p = document.createElement("div");
 
-          const angle = (Math.PI*2/24)*i;
-          const speed = 80+Math.random()*80;
+          const angle = (Math.PI * 2 / 24) * i;
+          const speed = 80 + Math.random() * 80;
 
-          p.style.position="absolute";
-          p.style.width="6px";
-          p.style.height="6px";
-          p.style.borderRadius="50%";
-          p.style.background="hsl("+Math.random()*360+",100%,60%)";
-          p.style.transform="translate(0,0)";
-          p.style.opacity="1";
+          p.style.position = "absolute";
+          p.style.width = "6px";
+          p.style.height = "6px";
+          p.style.borderRadius = "50%";
+          p.style.background = "hsl(" + Math.random() * 360 + ",100%,60%)";
+          p.style.transform = "translate(0,0)";
+          p.style.opacity = "1";
 
           container.appendChild(p);
 
-          animateParticle(p,angle,speed);
+          animateParticle(p, angle, speed);
         }
 
-        setTimeout(()=>container.remove(),1200);
+        setTimeout(() => container.remove(), 1200);
       }
 
-      function animateParticle(el,angle,speed){
-        let start=null;
+      function animateParticle(el, angle, speed) {
+        let start = null;
 
-        function frame(t){
-          if(!start) start=t;
-          const progress=(t-start)/1000;
+        function frame(t) {
+          if (!start) start = t;
+          const progress = (t - start) / 1000;
 
-          if(progress>1){
-            el.style.opacity=0;
+          if (progress > 1) {
+            el.style.opacity = 0;
             return;
           }
 
-          const x=Math.cos(angle)*speed*progress;
-          const y=Math.sin(angle)*speed*progress;
+          const x = Math.cos(angle) * speed * progress;
+          const y = Math.sin(angle) * speed * progress;
 
-          el.style.transform="translate("+x+"px,"+y+"px)";
-          el.style.opacity=1-progress;
+          el.style.transform = "translate(" + x + "px," + y + "px)";
+          el.style.opacity = 1 - progress;
 
           requestAnimationFrame(frame);
         }
@@ -505,14 +486,15 @@
       }
 
       /* spawn loop */
-      setInterval(()=>{
+      setInterval(() => {
         spawnFirework(
-          Math.random()*window.innerWidth,
-          Math.random()*window.innerHeight*0.6
+          Math.random() * window.innerWidth,
+          Math.random() * window.innerHeight * 0.6
         );
-      },900);
+      }, 900);
 
     };
-    </script>
-  </body>
+  </script>
+</body>
+
 </html>
