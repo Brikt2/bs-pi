@@ -141,8 +141,6 @@
 
       function vis_nyhet1(data) {
         const nyheter = data.items.filter((nyhet) => nyhet.enclosure.link);
-        console.log(nyheter);
-        console.log(data);
         const nyhet1 = nyheter[0];
         const nyhet2 = nyheter[1];
         const nyhet3 = nyheter[2];
@@ -159,7 +157,7 @@
           <img src='${nyhet1.enclosure.link}' alt='${nyhet1.title}'>
         `;
         boks.appendChild(div);
-        setTimeout(() => vis_nyhet2(nyhet2, nyhet3), 20000);
+        setTimeout(() => vis_nyhet2(nyhet2, nyhet3), 15000);
       }
 
       function vis_nyhet2(nyhet2, nyhet3) {
@@ -176,7 +174,7 @@
           <img src='${nyhet2.enclosure.link}' alt='${nyhet2.title}'>
         `;
         boks.appendChild(div);
-        setTimeout(() => vis_nyhet3(nyhet3), 20000);
+        setTimeout(() => vis_nyhet3(nyhet3), 15000);
       }
 
       function vis_nyhet3(nyhet3) {
@@ -193,7 +191,7 @@
           <img src='${nyhet3.enclosure.link}' alt='${nyhet3.title}'>
         `;
         boks.appendChild(div);
-        setTimeout(hent_nyheter, 20000);
+        setTimeout(hent_nyheter, 15000);
       }
     </script>
   </body>
