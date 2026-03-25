@@ -4,16 +4,15 @@
 <meta charset="UTF-8">
 <title>NRK Ticker</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;800&display=swap');
-
   :root {
-    --ticker-height: clamp(52px, 7vh, 84px);
+    --ticker-height: clamp(60px, 8vh, 96px);
     --label-font-size: clamp(0.72rem, 1vw, 1rem);
     --headline-font-size: clamp(1.15rem, 1.8vw, 1.75rem);
     --item-gap: clamp(56px, 6vw, 90px);
     --label-padding-x: clamp(10px, 1.2vw, 18px);
-    --label-gap: clamp(6px, 0.7vw, 10px);
+    --label-gap: clamp(4px, 0.45vw, 7px);
     --border-size: clamp(2px, 0.25vw, 4px);
+    --label-border-size: clamp(1px, 0.14vw, 2px);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -24,22 +23,24 @@
     height: var(--ticker-height);
     display: flex;
     align-items: stretch;
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'NRK Sans Semi Condensed', 'NRK Sans', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 700;
   }
 
   #label {
-    background: #21a3f4;
+    background: #1767CE; 
     display: flex;
     align-items: center;
     gap: var(--label-gap);
     padding: 0 var(--label-padding-x);
     flex-shrink: 0;
-    font-weight: 800;
+    font-weight: 700;
     font-size: var(--label-font-size);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
     color: #fff;
     white-space: nowrap;
+    border: var(--label-border-size) solid #fff;
   }
 
   #label .dot {
@@ -47,12 +48,25 @@
     height: clamp(6px, 0.7vw, 10px);
     border-radius: 50%;
     background: #fff;
-    animation: blink 1.2s infinite;
+    animation: blink 1.2s infinite ease-in-out;
+    flex-shrink: 0;
+  }
+
+  #label .logo {
+    display: block;
+    width: clamp(52px, 7vw, 84px);
+    height: auto;
   }
 
   @keyframes blink {
-    0%,100% { opacity: 1; }
-    50%      { opacity: 0.2; }
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.35;
+      transform: scale(0.72);
+    }
   }
 
   #wrap {
@@ -60,8 +74,7 @@
     overflow: hidden;
     display: flex;
     align-items: center;
-    border-top: var(--border-size) solid #21a3f4;
-    border-bottom: var(--border-size) solid #21a3f4;
+    background: #0a2343;
   }
 
   #track {
@@ -75,35 +88,51 @@
     display: inline-flex;
     align-items: center;
     font-size: var(--headline-font-size);
-    font-weight: 500;
+    font-weight: 700;
     color: #fff;
     letter-spacing: 0.02em;
     padding-right: var(--item-gap);
   }
 
   .item::before {
-    content: '◆';
-    color: #f0c040;
-    font-size: clamp(0.6rem, 0.85vw, 0.95rem);
+    content: '';
+    display: inline-block;
+    width: clamp(6px, 0.7vw, 10px);
+    height: clamp(6px, 0.7vw, 10px);
+    border-radius: 50%;
+    background: #ff3b30;
+    animation: alert-pulse 1.2s infinite ease-in-out;
     margin-right: clamp(16px, 1.4vw, 24px);
     flex-shrink: 0;
   }
 
+  @keyframes alert-pulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(0.72);
+    }
+    50% {
+      opacity: 0.35;
+      transform: scale(1);
+    }
+  }
+
   @media (orientation: portrait) {
     :root {
-      --ticker-height: clamp(74px, 9vh, 120px);
+      --ticker-height: clamp(82px, 10vh, 132px);
       --label-font-size: clamp(0.95rem, 1.6vw, 1.35rem);
       --headline-font-size: clamp(1.45rem, 2.6vw, 2.35rem);
       --item-gap: clamp(72px, 8vw, 130px);
       --label-padding-x: clamp(14px, 2vw, 24px);
-      --label-gap: clamp(8px, 1vw, 14px);
+      --label-gap: clamp(5px, 0.7vw, 9px);
       --border-size: clamp(3px, 0.35vw, 5px);
+      --label-border-size: clamp(1px, 0.16vw, 2px);
     }
   }
 
   @media (max-width: 640px) {
     :root {
-      --ticker-height: clamp(48px, 8vh, 68px);
+      --ticker-height: clamp(56px, 9vh, 80px);
       --headline-font-size: clamp(1rem, 4.8vw, 1.3rem);
       --item-gap: clamp(44px, 8vw, 72px);
     }
@@ -113,8 +142,8 @@
 <body>
 
 <div id="label">
-  <span class="dot"></span>
-  NYHETER
+  <span class="dot" aria-hidden="true"></span>
+  <img class="logo" src="NRK/RGB/SVG/NRK_neg.svg" alt="NRK">
 </div>
 
 <div id="wrap">
