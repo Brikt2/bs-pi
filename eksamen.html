@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="no">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Eksamen – 4. juni</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #080c14;
+      --text: #e6eef8;
+      --dim: rgba(230, 238, 248, 0.45);
+      --accent: #e03030;
+    }
+
+    html,
+    body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+
+    /* ---- senter ---- */
+    .wrap {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(10px, 1.6vh, 22px);
+      padding: 24px 24px 220px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .dato {
+      font-size: clamp(22px, 3.5vw, 52px);
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .countdown {
+      display: flex;
+      align-items: flex-start;
+      gap: clamp(6px, 1.2vw, 20px);
+    }
+
+    .cd-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .cd-num {
+      font-size: clamp(40px, 8vw, 120px);
+      font-weight: 900;
+      line-height: 0.9;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.03em;
+      transition: color 0.4s;
+    }
+
+    .cd-label {
+      font-size: clamp(9px, 1vw, 14px);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--dim);
+      font-weight: 500;
+    }
+
+    .cd-sep {
+      font-size: clamp(40px, 8vw, 120px);
+      font-weight: 900;
+      line-height: 0.9;
+      color: var(--accent);
+      opacity: 0.5;
+      user-select: none;
+    }
+
+    .null-tekst {
+      display: none;
+      font-size: clamp(40px, 8vw, 120px);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      text-align: center;
+      color: var(--accent);
+      line-height: 1.1;
+    }
+
+    @keyframes blink-red {
+
+      0%,
+      100% {
+        background: var(--bg);
+      }
+
+      50% {
+        background: #1a0000;
+      }
+    }
+
+    body.ringing {
+      animation: blink-red 0.8s ease-in-out infinite;
+    }
+
+    .takk {
+      font-size: clamp(13px, 1.4vw, 20px);
+      color: var(--dim);
+      letter-spacing: 0.05em;
+      font-style: italic;
+    }
+
+    /* ---- hatter ---- */
+    .oppå {
+      position: absolute;
+      z-index: 3;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .hatt1,
+    .hatt2 {
+      position: absolute;
+      top: 20px;
+      font-size: clamp(48px, 7vw, 90px);
+    }
+
+    .hatt1 {
+      left: 24px;
+      rotate: -15deg;
+    }
+
+    .hatt2 {
+      right: 24px;
+      rotate: 15deg;
+    }
+
+    @keyframes bounce-hat {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      35% {
+        transform: translateY(-18px) rotate(-10deg);
+      }
+
+      65% {
+        transform: translateY(-6px) rotate(4deg);
+      }
+    }
+
+    .hattel {
+      display: inline-block;
+    }
+
+    /* ---- belt scene ---- */
+    #belt-scene {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 220px;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* belt band */
+    #belt-band {
+      position: absolute;
+      height: 44px;
+      background: repeating-linear-gradient(90deg,
+          #2b2b2b 0px, #2b2b2b 28px,
+          #383838 28px, #383838 56px);
+      border-top: 4px solid #555;
+      border-bottom: 4px solid #111;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+    }
+
+    /* rollers */
+    .roller {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #888, #444 45%, #222);
+      box-shadow: inset -3px -3px 8px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.7);
+    }
+
+    .roller-spoke {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 70%;
+      height: 3px;
+      margin-top: -1.5px;
+      margin-left: -35%;
+      background: #555;
+      border-radius: 2px;
+    }
+
+    /* naam labels op de belt */
+    .belt-naam {
+      position: absolute;
+      white-space: nowrap;
+      font-weight: 900;
+      font-size: clamp(26px, 3.5vw, 48px);
+      color: var(--text);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+      will-change: transform;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="oppå">
+    <div class="hatt1"><span class="hatt hattel">🎓</span></div>
+    <div class="hatt2"><span class="hatt hattel">🎓</span></div>
+  </div>
+
+  <div class="wrap">
+    <p class="dato">Eksamen &mdash; 4. juni 2026</p>
+
+    <div class="countdown" id="countdown">
+      <div class="cd-unit">
+        <span class="cd-num" id="cd-dager">--</span>
+        <span class="cd-label">dager</span>
+      </div>
+      <span class="cd-sep">:</span>
+      <div class="cd-unit">
+        <span class="cd-num" id="cd-timer">--</span>
+        <span class="cd-label">timer</span>
+      </div>
+      <span class="cd-sep">:</span>
+      <div class="cd-unit">
+        <span class="cd-num" id="cd-min">--</span>
+        <span class="cd-label">min</span>
+      </div>
+      <span class="cd-sep">:</span>
+      <div class="cd-unit">
+        <span class="cd-num" id="cd-sek">--</span>
+        <span class="cd-label">sek</span>
+      </div>
+      <span class="cd-sep">:</span>
+      <div class="cd-unit">
+        <span class="cd-num" id="cd-ms">--</span>
+        <span class="cd-label">ms</span>
+      </div>
+    </div>
+
+    <div class="null-tekst" id="null-tekst">
+      DET STARTER NÅ.<br>PENN I HÅNDA.
+    </div>
+
+    <p class="takk">Takk for at du tar en for laget.</p>
+  </div>
+
+  <div id="belt-scene">
+    <div id="belt-band"></div>
+    <div class="roller" id="roller-left">
+      <div class="roller-spoke" id="spoke-left"></div>
+    </div>
+    <div class="roller" id="roller-right">
+      <div class="roller-spoke" id="spoke-right"></div>
+    </div>
+  </div>
+
+  <script>
+    window.onload = function () {
+
+      /* ---- HATTER ---- */
+      var hatter = document.getElementsByClassName("hatt");
+      var forsinkelse = [0, 400];
+      function bounceLoop(hatt, delay) {
+        setTimeout(function () {
+          hatt.style.animation = "none";
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              hatt.style.animation = "bounce-hat 1.5s ease-in-out";
+            });
+          });
+          setTimeout(function () {bounceLoop(hatt, 1900);}, 1500);
+        }, delay);
+      }
+      for (var i = 0; i < hatter.length; i++) bounceLoop(hatter[i], forsinkelse[i]);
+
+      /* ---- COUNTDOWN ---- */
+      var maal = new Date("2026-06-04T08:00:00");
+      var elDager = document.getElementById("cd-dager");
+      var elTimer = document.getElementById("cd-timer");
+      var elMin = document.getElementById("cd-min");
+      var elSek = document.getElementById("cd-sek");
+      var elMs = document.getElementById("cd-ms");
+      var elCD = document.getElementById("countdown");
+      var elNull = document.getElementById("null-tekst");
+
+      function pad(n) {return String(n).padStart(2, "0");}
+
+      function oppdater() {
+        var diff = maal - Date.now();
+        if (diff <= 0) {
+          elCD.style.display = "none";
+          elNull.style.display = "block";
+          document.body.classList.add("ringing");
+          return;
+        }
+        var dager = Math.floor(diff / 86400000);
+        var timer = Math.floor((diff % 86400000) / 3600000);
+        var min = Math.floor((diff % 3600000) / 60000);
+        var sek = Math.floor((diff % 60000) / 1000);
+        var ms = Math.floor((diff % 1000) / 10);
+
+        elDager.textContent = pad(dager);
+        elTimer.textContent = pad(timer);
+        elMin.textContent = pad(min);
+        elSek.textContent = pad(sek);
+        elMs.textContent = pad(ms);
+
+        var farge = dager < 7 ? "var(--accent)" : "var(--text)";
+        elDager.style.color = farge;
+        elTimer.style.color = farge;
+        elMin.style.color = farge;
+        elSek.style.color = farge;
+        elMs.style.color = farge;
+      }
+      oppdater();
+      setInterval(oppdater, 30);
+
+      /* ---- BELT LAYOUT ---- */
+      var scene = document.getElementById("belt-scene");
+      var band = document.getElementById("belt-band");
+      var rollerL = document.getElementById("roller-left");
+      var rollerR = document.getElementById("roller-right");
+      var spokeL = document.getElementById("spoke-left");
+      var spokeR = document.getElementById("spoke-right");
+
+      var ROLLER_R = 28;          // radius px
+      var BELT_H = 44;          // belt band height px
+      var SCENE_H = 220;
+
+      /* belt sits in the upper half of the scene */
+      var BELT_TOP = 80;          /* from top of scene */
+      var ROLLER_CY = BELT_TOP + BELT_H / 2;   /* roller center Y in scene */
+      var LEFT_CX = Math.round(window.innerWidth * 0.20);
+      var RIGHT_CX = window.innerWidth; /* senter akkurat ved høyre kant → bare venstre halvdel synlig */
+
+      /* position belt band — strekker seg helt til høyre skjermkant */
+      band.style.top = BELT_TOP + "px";
+      band.style.left = LEFT_CX + "px";
+      band.style.right = "0";
+      band.style.height = BELT_H + "px";
+
+      /* position rollers */
+      function placeRoller(el, cx) {
+        el.style.width = (ROLLER_R * 2) + "px";
+        el.style.height = (ROLLER_R * 2) + "px";
+        el.style.left = (cx - ROLLER_R) + "px";
+        el.style.top = (ROLLER_CY - ROLLER_R) + "px";
+      }
+      placeRoller(rollerL, LEFT_CX);
+      placeRoller(rollerR, RIGHT_CX); /* halvt utenfor skjermen */
+
+      /* ---- BELT ANIMATION ---- */
+      var BELT_SPEED = 140;        /* px / sek */
+      var GRAVITY = 800;
+      var SPAWN_INT = 2600;       /* ms between names */
+
+      var beltOffset = 0;
+      var spokeAngle = 0;
+      var aktive = [];
+      var navnListe = ["Sander", "Oscar", "Sebastian", "Iver", "Mikkel", "Petter"];
+      var navnIdx = 0;
+      var prevTs = null;
+
+      function spawnNavn() {
+        var el = document.createElement("div");
+        el.className = "belt-naam";
+        el.textContent = navnListe[navnIdx % navnListe.length];
+        el.style.left = (window.innerWidth + 200) + "px";
+        el.style.top = "-200px";
+        navnIdx++;
+        scene.appendChild(el);
+
+        /* measure after one paint */
+        requestAnimationFrame(function () {
+          var w = el.offsetWidth || 120;
+          var h = el.offsetHeight || 44;
+          var yOnBelt = BELT_TOP - h;          /* bottom of name sits on belt top */
+          aktive.push({
+            el: el,
+            x: window.innerWidth + 10,
+            y: yOnBelt,
+            w: w,
+            h: h,
+            vy: 0,
+            rot: 0,
+            fase: "rull"
+          });
+        });
+      }
+
+      function loop(ts) {
+        if (!prevTs) prevTs = ts;
+        var dt = Math.min((ts - prevTs) / 1000, 0.05);
+        prevTs = ts;
+
+        /* rotate spokes — belt går mot venstre → hjul snurrer mot klokken */
+        var dDeg = (BELT_SPEED * dt / (ROLLER_R * Math.PI * 2)) * 360;
+        spokeAngle -= dDeg;
+        spokeL.style.transform = "rotate(" + spokeAngle + "deg)";
+        spokeR.style.transform = "rotate(" + spokeAngle + "deg)";
+
+        /* scroll belt stripe pattern */
+        beltOffset = ((beltOffset - BELT_SPEED * dt) % 56 + 56) % 56;
+        band.style.backgroundPositionX = beltOffset + "px";
+
+        /* update each name */
+        for (var i = aktive.length - 1; i >= 0; i--) {
+          var p = aktive[i];
+
+          if (p.fase === "rull") {
+            p.x -= BELT_SPEED * dt;
+
+            /* fall off left roller when right edge of name passes LEFT_CX */
+            if (p.x + p.w < LEFT_CX) {
+              p.fase = "fall";
+              p.x = LEFT_CX - p.w;   /* pin to left edge */
+              p.vy = 0;
+            }
+          } else {
+            /* fall with gravity + slight leftward drift */
+            p.vy += GRAVITY * dt;
+            p.y += p.vy * dt;
+            p.x -= 40 * dt;
+            p.rot -= 120 * dt;
+
+            var fallProgress = (p.y - (BELT_TOP - p.h)) / (SCENE_H - BELT_TOP + p.h);
+            p.el.style.opacity = Math.max(0, 1 - fallProgress * 1.4).toFixed(2);
+
+            if (p.y > SCENE_H + 20) {
+              spawnFlameBurst(p.x + p.w / 2);
+              scene.removeChild(p.el);
+              aktive.splice(i, 1);
+              continue;
+            }
+          }
+
+          p.el.style.left = Math.round(p.x) + "px";
+          p.el.style.top = Math.round(p.y) + "px";
+          p.el.style.transform = "rotate(" + p.rot.toFixed(1) + "deg)";
+        }
+
+        requestAnimationFrame(loop);
+      }
+
+      spawnNavn();
+      setInterval(spawnNavn, SPAWN_INT);
+      requestAnimationFrame(loop);
+
+      /* ---- FLAMMER ---- */
+      function enkeltFlame(x, w, h, dur, hue, bright, maxOpacity) {
+        if (maxOpacity === undefined) maxOpacity = 0.9;
+        var el = document.createElement("div");
+        el.style.cssText = [
+          "position:absolute",
+          "left:" + (x - w / 2) + "px",
+          "bottom:0",
+          "width:" + w + "px",
+          "height:" + h + "px",
+          "border-radius:45% 45% 25% 25%",
+          "background:radial-gradient(ellipse at 50% 95%," +
+          "hsl(55,100%," + (bright + 20) + "%) 0%," +
+          "hsl(" + hue + ",100%," + bright + "%) 35%," +
+          "hsl(" + (hue - 15) + ",100%," + (bright - 15) + "%) 65%," +
+          "transparent 100%)",
+          "pointer-events:none",
+          "will-change:transform,opacity"
+        ].join(";");
+        scene.appendChild(el);
+
+        var start = null;
+        (function flameFrame(ts) {
+          if (!start) start = ts;
+          var p = (ts - start) / dur;
+          if (p >= 1) {if (el.parentNode) scene.removeChild(el); return;}
+          var wobble = Math.sin(p * Math.PI * 3) * 4;
+          el.style.transform = "translateY(" + (-(h * p * 1.05)).toFixed(1) + "px)" +
+            " scaleX(" + (1 - p * 0.45 + wobble * 0.01).toFixed(3) + ")";
+          el.style.opacity = ((1 - p * p) * maxOpacity).toFixed(2);
+          requestAnimationFrame(flameFrame);
+        })(0);
+      }
+
+      function spawnFlame() {
+        var x = Math.random() * (LEFT_CX + 60);
+        var hue = 18 + Math.random() * 22;
+        /* stor flamme — kort, holder seg nede */
+        enkeltFlame(x, 30 + Math.random() * 40, 12 + Math.random() * 16,
+          350 + Math.random() * 300, hue, 55);
+        /* indre kjerne */
+        if (Math.random() > 0.4)
+          enkeltFlame(x + (Math.random() - 0.5) * 20,
+            14 + Math.random() * 18, 8 + Math.random() * 10,
+            250 + Math.random() * 200, hue + 10, 70);
+      }
+
+      /* flamme-burst når et navn havner i flammene */
+      function spawnFlameBurst(cx) {
+        for (var b = 0; b < 10; b++) {
+          var spread = (Math.random() - 0.5) * 120;
+          var hue = 15 + Math.random() * 30;
+          enkeltFlame(cx + spread,
+            40 + Math.random() * 60,
+            100 + Math.random() * 120,
+            400 + Math.random() * 350,
+            hue, 60);
+        }
+      }
+
+      setInterval(spawnFlame, 45);
+    };
+  </script>
+</body>
+
+</html>
